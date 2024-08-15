@@ -4,23 +4,6 @@ import fs from "fs";
 import express from "express";
 import * as dotenv from "dotenv/config";
 import morgan from "morgan";
-const pKey = fs.readFileSync("./data/key.txt", "utf-8");
-
-const formatKey = pKey.split("\\n").join("\n").replaceAll('"', "");
-
-fs.writeFileSync("./data/key.txt", formatKey);
-
-const ppKey = fs.readFileSync("./data/key.txt", "utf-8");
-
-fs.writeFileSync("./data/key.txt", pKey);
-
-interface BuildOptions {
-  value: string;
-}
-
-const buildOptions = parse<BuildOptions>({
-  value: String,
-});
 
 const publicKey = async (key: string) => {
   return openpgp.readKey({
@@ -37,10 +20,8 @@ async function pgp(value: string, key: string) {
       format: "armored",
     });
     return pass;
-
-    fs.writeFileSync("./data/result.txt", JSON.stringify(pass));
   } catch (e) {
-    throw new Error(`Error pgp: ${e}`);
+    throw new Error(`Pgp ${e}`);
   }
 }
 // main(buildOptions.value, ppKey);
@@ -58,14 +39,18 @@ app.get("/", (req, res) => {
   res.send("Estelink PGP");
 });
 
-app.post("/pgp", (req, res) => {
-  const { pgpKey, data } = req.body;
+app.post("/pgp", async (req, res) => {
+  const { key, data } = req.body;
 
-  if (!pgpKey || !data) res.status(400).send();
+  if (!key || !data) return res.status(400).send("key/data field are required");
 
-  const result = pgp(pgpKey, data);
+  try {
+    const result = await pgp(data, key);
 
-  res.status(200).send(result);
+    return res.status(200).send(result);
+  } catch (e) {
+    return res.status(400).send(`${e}`);
+  }
 });
 
 app.listen(port, () => {
