@@ -47,7 +47,7 @@ app.post("/pgp", async (req, res) => {
   try {
     const result = await pgp(data, key);
 
-    return res.status(200).send(result);
+    return res.status(200).send(JSON.stringify(result));
   } catch (e) {
     return res.status(400).send(`${e}`);
   }
