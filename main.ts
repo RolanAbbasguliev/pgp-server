@@ -1,8 +1,5 @@
-import { parse } from "ts-command-line-args";
 import * as openpgp from "openpgp";
-import fs from "fs";
 import express from "express";
-import * as dotenv from "dotenv/config";
 import morgan from "morgan";
 
 const publicKey = async (key: string) => {
@@ -24,7 +21,6 @@ async function pgp(value: string, key: string) {
     throw new Error(`Pgp ${e}`);
   }
 }
-// main(buildOptions.value, ppKey);
 
 const app = express();
 
